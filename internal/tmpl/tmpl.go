@@ -1,13 +1,14 @@
 // Package tmpl scans an environment's YAML templates for jobs-build image
 // objects and renders the templates with resolved image references.
 //
-// A template is any *.yaml/*.yml file under the environment directory except
-// assimilate.yaml, walked in lexical path order. Multi-document files are
-// supported. Anywhere in a document, a mapping value of an `image` key that
-// contains `type: jobs-build` is a build object; every other `image` value is
-// left untouched. Build objects must be inlined: aliases and `<<` merge keys
-// that hide or share one are Scan errors. Comments and document structure
-// survive rendering (yaml.v3 node-level round trip).
+// A template is any *.yaml/*.yml/*.json file under the environment directory
+// except assimilate.yaml, walked in lexical path order. Multi-document YAML
+// files are supported. Anywhere in a YAML document, a mapping value of an
+// `image` key that contains `type: jobs-build` is a build object; every other
+// `image` value is left untouched. Build objects must be inlined: aliases and
+// `<<` merge keys that hide or share one are Scan errors. Comments and
+// document structure survive rendering (yaml.v3 node-level round trip).
+// JSON templates are copied verbatim — no jobs-build substitution.
 package tmpl
 
 import (
@@ -83,7 +84,7 @@ func Scan(envDir string) (*Extraction, error) {
 		if strings.HasPrefix(name, ".") || p == configPath {
 			return nil
 		}
-		if ext := filepath.Ext(name); ext != ".yaml" && ext != ".yml" {
+		if ext := filepath.Ext(name); ext != ".yaml" && ext != ".yml" && ext != ".json" {
 			return nil
 		}
 		rel, err := filepath.Rel(envDir, p)
@@ -116,6 +117,12 @@ func (x *Extraction) scanFile(index map[string]int, fpath, rel string) error {
 		return err
 	}
 	f := &tmplFile{path: fpath, rel: rel, raw: raw}
+	if filepath.Ext(fpath) == ".json" {
+		// JSON cannot hold a jobs-build object (no substitution support);
+		// the file is emitted verbatim by Render.
+		x.files = append(x.files, f)
+		return nil
+	}
 	dec := yaml.NewDecoder(bytes.NewReader(raw))
 	for {
 		var doc yaml.Node

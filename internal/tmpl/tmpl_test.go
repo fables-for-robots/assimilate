@@ -192,8 +192,8 @@ func TestScanSkips(t *testing.T) {
 		"assimilate.yaml":     "image:\n  type: jobs-build\n  bogus: [unclosed\n",
 		".hidden.yaml":        "also: [broken\n",
 		".hiddendir/x.yaml":   "still: [broken\n",
+		".hidden.json":        "{",
 		"notes.md":            "# not yaml\n",
-		"data.json":           "{",
 		"sub/assimilate.yaml": fmt.Sprintf(valid, "svc/a"), // only envDir/assimilate.yaml is special
 		"app.yml":             fmt.Sprintf(valid, "svc/b"), // .yml counts
 	})
@@ -213,6 +213,31 @@ func TestScanSkips(t *testing.T) {
 		if _, ok := out[p]; !ok {
 			t.Errorf("missing rendered file %q (have %v)", p, got)
 		}
+	}
+}
+
+// JSON templates are never parsed or substituted: byte-identical passthrough,
+// even for content that looks like a build object or is not valid JSON.
+func TestScanJSONVerbatim(t *testing.T) {
+	jsonBody := "{\n  \"image\": {\"type\": \"jobs-build\", \"platform\": \"linux/amd64\"}\n}\n"
+	dir := writeTree(t, map[string]string{
+		"config.json":     jsonBody,
+		"sub/broken.json": "{not json",
+		"api.yaml":        "image:\n  type: jobs-build\n  platform: linux/amd64\n",
+	})
+	x := mustScan(t, dir)
+	if len(x.Builds) != 1 {
+		t.Fatalf("Builds = %+v, want only the YAML build", x.Builds)
+	}
+	out := mustRender(t, x, allRefs(x))
+	if len(out) != 3 {
+		t.Fatalf("rendered %d files, want 3", len(out))
+	}
+	if got := string(out["config.json"]); got != jsonBody {
+		t.Errorf("config.json = %q, want %q", got, jsonBody)
+	}
+	if got := string(out["sub/broken.json"]); got != "{not json" {
+		t.Errorf("sub/broken.json = %q", got)
 	}
 }
 

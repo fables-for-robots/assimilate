@@ -54,6 +54,9 @@ containers:
       platform: linux/amd64  # required
 ```
 
+`*.json` files under the environment directory are templates too, copied
+verbatim — JSON holds no jobs-build objects.
+
 Every other `image` value is left untouched. Identical specs are built once
 and substituted everywhere. The substituted reference is
 `<registry>/jobs:<K>` — the jobs-registry serves one repository named `jobs`
@@ -71,6 +74,16 @@ anchors/aliases or `<<` merge keys — the template scanner rejects them.
 
 Files without substitutions are copied byte-identical; substituted files keep
 their comments.
+
+## Ownership markers
+
+Every file assimilate publishes carries a checksum of its content: YAML files
+as a `# assimilate-hash: <sha256>` first line, JSON files in a committed
+sidecar named `<file>.json.assimilate`. On the next deploy, assimilate only
+overwrites files whose marker is present and still matches — a file somebody
+created or edited by hand is a conflict, listed in the error, and nothing is
+pushed. `deploy --force` overwrites conflicting files anyway (each one is
+logged). Files assimilate no longer renders are never pruned.
 
 ## Environment config (`assimilate-templates/<env>/assimilate.yaml`)
 

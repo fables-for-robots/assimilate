@@ -50,6 +50,7 @@ func newApp() *cli.App {
 				Flags: []cli.Flag{
 					&cli.BoolFlag{Name: "rollout", Usage: "merge the PR and trigger the ArgoCD refresh/sync"},
 					&cli.BoolFlag{Name: "plain", Usage: "plain line output even on a TTY"},
+					&cli.BoolFlag{Name: "force", Usage: "overwrite GitOps files that assimilate did not generate or that were edited since"},
 				},
 				Action: deploy,
 			},
@@ -232,6 +233,7 @@ func deploy(c *cli.Context) error {
 		Env:     env,
 		Message: commitMessage(env, results),
 		Files:   files,
+		Force:   c.Bool("force"),
 	}, rollout, logf)
 	if err != nil {
 		return err

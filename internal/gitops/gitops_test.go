@@ -18,8 +18,15 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/google/go-github/v73/github"
 
+	"github.com/fables-for-robots/assimilate/internal/ownership"
 	"github.com/fables-for-robots/assimilate/internal/spec"
 )
+
+// marked returns body as ownership.WriteMarked stores a YAML file: the hash
+// marker line followed by the body.
+func marked(body string) string {
+	return ownership.MarkerPrefix + ownership.ComputeBodyHash("x.yaml", []byte(body)) + "\n" + body
+}
 
 var testStamp = time.Date(2026, 7, 24, 12, 30, 45, 0, time.UTC)
 
@@ -178,7 +185,7 @@ func TestPushBranch(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			upstream := seedUpstream(t, map[string]string{
 				"README.md":                  "hi\n",
-				"clusters/staging/api.yaml":  "kind: Deployment\nimage: old\n",
+				"clusters/staging/api.yaml":  marked("kind: Deployment\nimage: old\n"),
 				"clusters/staging/keep.yaml": "stray\n",
 			})
 			stubGit(t, upstream)
@@ -200,8 +207,8 @@ func TestPushBranch(t *testing.T) {
 
 			c, files := branchTip(t, upstream, branch)
 			for path, want := range map[string]string{
-				"clusters/staging/api.yaml":           string(ch.Files["api.yaml"]),
-				"clusters/staging/workers/queue.yaml": string(ch.Files["workers/queue.yaml"]),
+				"clusters/staging/api.yaml":           marked(string(ch.Files["api.yaml"])),
+				"clusters/staging/workers/queue.yaml": marked(string(ch.Files["workers/queue.yaml"])),
 				"clusters/staging/keep.yaml":          "stray\n", // strays are never pruned
 				"README.md":                           "hi\n",    // files outside cfg.Path untouched
 			} {
@@ -232,7 +239,7 @@ func TestPushBranch(t *testing.T) {
 // Publishing the same content twice: once the first branch is merged into
 // main, a re-publish must short-circuit with no branch or push.
 func TestPushBranchNoChanges(t *testing.T) {
-	upstream := seedUpstream(t, map[string]string{"clusters/staging/api.yaml": "old\n"})
+	upstream := seedUpstream(t, map[string]string{"clusters/staging/api.yaml": marked("old\n")})
 	stubGit(t, upstream)
 	cfg := spec.GitConfig{Type: "github", Repo: "acme/gitops", Path: "clusters/staging", Branch: "main"}
 	ch := testChange()
@@ -267,6 +274,122 @@ func TestPushBranchNoChanges(t *testing.T) {
 			t.Errorf("stray branch %s", name)
 		}
 	}
+}
+
+// A target file without a marker (not assimilate's) or with a stale marker
+// (edited since generated) blocks the publication unless Force is set.
+func TestPushBranchOwnershipConflicts(t *testing.T) {
+	// queue.yaml carries a marker for a different body: edited after generation.
+	tampered := ownership.MarkerPrefix + ownership.ComputeBodyHash("x.yaml", []byte("original\n")) + "\nedited by hand\n"
+	seed := map[string]string{
+		"clusters/staging/api.yaml":           "kind: Deployment\nimage: old\n", // no marker
+		"clusters/staging/workers/queue.yaml": tampered,
+	}
+
+	t.Run("without force", func(t *testing.T) {
+		upstream := seedUpstream(t, seed)
+		stubGit(t, upstream)
+		cfg := spec.GitConfig{Type: "github", Repo: "acme/gitops", Path: "clusters/staging", Branch: "main"}
+
+		_, _, err := pushBranch(context.Background(), cfg, "", testChange(), discard)
+		if err == nil {
+			t.Fatal("no error")
+		}
+		for _, want := range []string{
+			"clusters/staging/api.yaml: no assimilate marker",
+			"clusters/staging/workers/queue.yaml: edited since assimilate generated it",
+			"--force",
+		} {
+			if !strings.Contains(err.Error(), want) {
+				t.Errorf("error %q missing %q", err, want)
+			}
+		}
+		for _, name := range branchNames(t, upstream) {
+			if strings.HasPrefix(name, "assimilate/") {
+				t.Errorf("branch %s pushed despite conflicts", name)
+			}
+		}
+	})
+
+	t.Run("with force", func(t *testing.T) {
+		upstream := seedUpstream(t, seed)
+		stubGit(t, upstream)
+		cfg := spec.GitConfig{Type: "github", Repo: "acme/gitops", Path: "clusters/staging", Branch: "main"}
+		ch := testChange()
+		ch.Force = true
+
+		var logs []string
+		branch, noChanges, err := pushBranch(context.Background(), cfg, "", ch, func(s string) { logs = append(logs, s) })
+		if err != nil || noChanges {
+			t.Fatalf("noChanges=%v err=%v", noChanges, err)
+		}
+		_, files := branchTip(t, upstream, branch)
+		for path, want := range map[string]string{
+			"clusters/staging/api.yaml":           marked(string(ch.Files["api.yaml"])),
+			"clusters/staging/workers/queue.yaml": marked(string(ch.Files["workers/queue.yaml"])),
+		} {
+			if got := files[path]; got != want {
+				t.Errorf("%s = %q, want %q", path, got, want)
+			}
+		}
+		joined := strings.Join(logs, "\n")
+		for _, want := range []string{
+			"overwriting clusters/staging/api.yaml (no assimilate marker)",
+			"overwriting clusters/staging/workers/queue.yaml (edited since assimilate generated it)",
+		} {
+			if !strings.Contains(joined, want) {
+				t.Errorf("logs %q missing %q", logs, want)
+			}
+		}
+	})
+}
+
+// JSON files are pushed verbatim with their hash in a committed sidecar; a
+// re-publish of identical content is a no-change, and a JSON file present
+// without its sidecar is a conflict.
+func TestPushBranchJSONSidecar(t *testing.T) {
+	body := `{"replicas": 2}` + "\n"
+	hash := ownership.ComputeBodyHash("x.json", []byte(body))
+	ch := Change{Env: "staging", Message: "m", Files: map[string][]byte{"config.json": []byte(body)}}
+	cfg := spec.GitConfig{Type: "github", Repo: "acme/gitops", Path: "clusters/staging", Branch: "main"}
+
+	upstream := seedUpstream(t, map[string]string{"README.md": "hi\n"})
+	stubGit(t, upstream)
+	branch, noChanges, err := pushBranch(context.Background(), cfg, "", ch, discard)
+	if err != nil || noChanges {
+		t.Fatalf("noChanges=%v err=%v", noChanges, err)
+	}
+	_, files := branchTip(t, upstream, branch)
+	if got := files["clusters/staging/config.json"]; got != body {
+		t.Errorf("config.json = %q, want %q", got, body)
+	}
+	if got := files["clusters/staging/config.json"+ownership.SidecarExt]; got != hash+"\n" {
+		t.Errorf("sidecar = %q, want %q", got, hash+"\n")
+	}
+
+	t.Run("identical content is no-change", func(t *testing.T) {
+		upstream := seedUpstream(t, map[string]string{
+			"clusters/staging/config.json":                        body,
+			"clusters/staging/config.json" + ownership.SidecarExt: hash + "\n",
+		})
+		stubGit(t, upstream)
+		_, noChanges, err := pushBranch(context.Background(), cfg, "", ch, discard)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !noChanges {
+			t.Error("expected noChanges")
+		}
+	})
+
+	t.Run("missing sidecar is a conflict", func(t *testing.T) {
+		upstream := seedUpstream(t, map[string]string{"clusters/staging/config.json": body})
+		stubGit(t, upstream)
+		_, _, err := pushBranch(context.Background(), cfg, "", ch, discard)
+		if err == nil || !strings.Contains(err.Error(), "clusters/staging/config.json: no assimilate marker") {
+			t.Fatalf("err = %v", err)
+		}
+	})
 }
 
 // ghCall is one recorded API request.
@@ -482,7 +605,7 @@ func TestOpenPRBranchDeleteBestEffort(t *testing.T) {
 }
 
 func TestPublish(t *testing.T) {
-	upstream := seedUpstream(t, map[string]string{"clusters/staging/api.yaml": "old\n"})
+	upstream := seedUpstream(t, map[string]string{"clusters/staging/api.yaml": marked("old\n")})
 	f, srv := newFakeGitHub(t)
 	stubGit(t, upstream)
 	stubAPI(t, srv)
@@ -498,7 +621,7 @@ func TestPublish(t *testing.T) {
 	if res != want {
 		t.Fatalf("res = %+v, want %+v", res, want)
 	}
-	if _, files := branchTip(t, upstream, testBranch); files["clusters/staging/api.yaml"] != string(ch.Files["api.yaml"]) {
+	if _, files := branchTip(t, upstream, testBranch); files["clusters/staging/api.yaml"] != marked(string(ch.Files["api.yaml"])) {
 		t.Error("pushed branch missing rendered file")
 	}
 	create := f.find("POST", "/pulls")
@@ -513,8 +636,8 @@ func TestPublish(t *testing.T) {
 func TestPublishNoChanges(t *testing.T) {
 	ch := testChange()
 	upstream := seedUpstream(t, map[string]string{
-		"clusters/staging/api.yaml":           string(ch.Files["api.yaml"]),
-		"clusters/staging/workers/queue.yaml": string(ch.Files["workers/queue.yaml"]),
+		"clusters/staging/api.yaml":           marked(string(ch.Files["api.yaml"])),
+		"clusters/staging/workers/queue.yaml": marked(string(ch.Files["workers/queue.yaml"])),
 	})
 	f, srv := newFakeGitHub(t)
 	stubGit(t, upstream)
