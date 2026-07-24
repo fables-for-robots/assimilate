@@ -172,3 +172,46 @@ func TestSignalContextSecondSignalKills(t *testing.T) {
 		}
 	}
 }
+
+func TestGithubToken(t *testing.T) {
+	t.Setenv("GITHUB_TOKEN", "")
+	t.Setenv("GH_TOKEN", "")
+
+	stub := func(t *testing.T, token string, err error) {
+		t.Helper()
+		orig := ghAuthToken
+		ghAuthToken = func(context.Context) (string, error) { return token, err }
+		t.Cleanup(func() { ghAuthToken = orig })
+	}
+
+	t.Run("env wins over gh", func(t *testing.T) {
+		t.Setenv("GITHUB_TOKEN", "from-env")
+		stub(t, "from-gh", nil)
+		got, err := githubToken(context.Background())
+		if err != nil || got != "from-env" {
+			t.Fatalf("got %q, %v; want from-env, nil", got, err)
+		}
+	})
+
+	t.Run("falls back to gh cli", func(t *testing.T) {
+		stub(t, "from-gh", nil)
+		got, err := githubToken(context.Background())
+		if err != nil || got != "from-gh" {
+			t.Fatalf("got %q, %v; want from-gh, nil", got, err)
+		}
+	})
+
+	t.Run("not logged in", func(t *testing.T) {
+		stub(t, "", errors.New("exit status 1"))
+		if _, err := githubToken(context.Background()); err == nil {
+			t.Fatal("want error when neither env nor gh provides a token")
+		}
+	})
+
+	t.Run("gh absent returns empty", func(t *testing.T) {
+		stub(t, "", nil)
+		if _, err := githubToken(context.Background()); err == nil {
+			t.Fatal("want error when gh returns an empty token")
+		}
+	})
+}

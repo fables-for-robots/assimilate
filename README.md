@@ -93,7 +93,7 @@ argocd:                              # optional; application URLs as copied from
 |---|---|
 | `JOBS_SERVER` | jobs-iroh server endpoint ID |
 | `JOBS_SERVER_ADDR` | optional direct `host:port` (skips discovery; comma-separable) |
-| `GITHUB_TOKEN` / `GH_TOKEN` | GitOps repo push + PR create/merge |
+| `GITHUB_TOKEN` / `GH_TOKEN` | GitOps repo push + PR create/merge; falls back to `gh auth token` when unset |
 | `ARGOCD_AUTH_TOKEN` / `ARGOCD_TOKEN` | ArgoCD API (`--rollout`) |
 | `ARGOCD_INSECURE=true` | skip TLS verification towards ArgoCD |
 | `ASSIMILATE_DATA_DIR` | local store dir (default `~/.local/share/assimilate`) |

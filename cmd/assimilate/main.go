@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"sort"
 	"strings"
@@ -149,9 +150,9 @@ func deploy(c *cli.Context) error {
 	if cfg.Git.Type == "" {
 		return errors.New("no git repo configured in assimilate.yaml")
 	}
-	ghToken := firstEnv("GITHUB_TOKEN", "GH_TOKEN")
-	if ghToken == "" {
-		return errors.New("GITHUB_TOKEN (or GH_TOKEN) must be set")
+	ghToken, err := githubToken(c.Context)
+	if err != nil {
+		return err
 	}
 	var argoToken string
 	if rollout && len(cfg.ArgoCD) > 0 {
@@ -308,6 +309,29 @@ func commitMessage(env string, results []builds.Result) string {
 		}
 	}
 	return b.String()
+}
+
+// ghAuthToken shells out to the GitHub CLI for the token of the logged-in
+// user; a var so tests can stub it.
+var ghAuthToken = func(ctx context.Context) (string, error) {
+	cmd := exec.CommandContext(ctx, "gh", "auth", "token")
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(out)), nil
+}
+
+// githubToken resolves the GitHub credential: the environment first, then the
+// GitHub CLI's own token if the user is already logged in with `gh auth login`.
+func githubToken(ctx context.Context) (string, error) {
+	if t := firstEnv("GITHUB_TOKEN", "GH_TOKEN"); t != "" {
+		return t, nil
+	}
+	if t, err := ghAuthToken(ctx); err == nil && t != "" {
+		return t, nil
+	}
+	return "", errors.New("no GitHub credential: set GITHUB_TOKEN (or GH_TOKEN), or log in with `gh auth login`")
 }
 
 func firstEnv(names ...string) string {

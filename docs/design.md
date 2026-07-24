@@ -65,7 +65,7 @@ and application from them.
 | `JOBS_SERVER` | jobs-iroh server endpoint ID (same var the jobs-client uses) |
 | `JOBS_SERVER_ADDR` | optional direct `host:port` for the server (skips discovery) |
 | `ASSIMILATE_DATA_DIR` | optional client store dir (default `~/.local/share/assimilate`; assimilate owns its store — `amber.Open`'s flock is single-process, so sharing jobs-client's dir would conflict) |
-| `GITHUB_TOKEN` (or `GH_TOKEN`) | GitOps repo push + PR create/merge |
+| `GITHUB_TOKEN` (or `GH_TOKEN`) | GitOps repo push + PR create/merge; when unset, `gh auth token` is used if the user is logged in with the GitHub CLI |
 | `ARGOCD_AUTH_TOKEN` (or `ARGOCD_TOKEN`) | ArgoCD API |
 | `ARGOCD_INSECURE=true` | skip TLS verification towards ArgoCD |
 
