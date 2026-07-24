@@ -136,3 +136,7 @@ go test -race ./...
 ```
 
 See [docs/design.md](docs/design.md) for the architecture.
+
+## License
+
+[GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0-only).

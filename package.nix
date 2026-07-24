@@ -15,6 +15,7 @@ buildGoModule {
   meta = {
     description = "assimilate";
     homepage = "https://github.com/fables-for-robots/assimilate";
+    license = lib.licenses.agpl3Only;
     mainProgram = "assimilate";
   };
 }
