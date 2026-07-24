@@ -14,6 +14,24 @@
         (system: f system nixpkgs.legacyPackages.${system});
     in {
 
+      overlays.default = final: prev: {
+        assimilate = final.callPackage ./package.nix { };
+      };
+
+      packages = eachSystem (system: pkgs: rec {
+        assimilate = pkgs.callPackage ./package.nix { };
+        default = assimilate;
+      });
+
+      apps = eachSystem (system: pkgs: rec {
+        assimilate = {
+          type = "app";
+          program = "${self.packages.${system}.assimilate}/bin/assimilate";
+          meta = { inherit (self.packages.${system}.assimilate.meta) description; };
+        };
+        default = assimilate;
+      });
+
       devShells = eachSystem (system: pkgs: {
         default = pkgs.mkShell {
           shellHook = ''
@@ -21,7 +39,7 @@
           '';
           hardeningDisable = [ "all" ];
 
-          packages = with pkgs; [ go ];
+          packages = with pkgs; [ go gh ];
         };
       });
     };

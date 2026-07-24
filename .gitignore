@@ -30,3 +30,7 @@ output/
 
 !.claude/settings.local.json
 /assimilate
+
+# nix build output
+result
+result-*
