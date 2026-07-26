@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/x/ansi v0.11.6
 	github.com/fables-for-robots/amber-store-core v0.0.0-20260720222444-a37d35fa4ecf
-	github.com/fables-for-robots/jobs-iroh v0.10.0
+	github.com/fables-for-robots/jobs-iroh v0.11.0
 	github.com/fxamacker/cbor/v2 v2.9.2
 	github.com/go-git/go-git/v5 v5.19.1
 	github.com/google/go-github/v73 v73.0.0

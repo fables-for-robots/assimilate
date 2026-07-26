@@ -93,8 +93,8 @@ github.com/fables-for-robots/amber-store-core v0.0.0-20260720222444-a37d35fa4ecf
 github.com/fables-for-robots/amber-store-core v0.0.0-20260720222444-a37d35fa4ecf/go.mod h1:cFxp0PbnCV/VyeRy706LprzLdOA6LjBHEGXmjYsvu6o=
 github.com/fables-for-robots/amber-store-iroh v0.0.0-20260721231548-857301522547 h1:qJzaGHKFfMJKQX/fCkLA0kZe6jUp8srWEI8tmbN94As=
 github.com/fables-for-robots/amber-store-iroh v0.0.0-20260721231548-857301522547/go.mod h1:GdKpylbfyoUKOp9njSeI8wV+fRGBC2YazIvrFi4rGFA=
-github.com/fables-for-robots/jobs-iroh v0.10.0 h1:pJCNoHZVOu/isInLlWTsK9oW4SywIQUEdMhxiq+Cz0o=
-github.com/fables-for-robots/jobs-iroh v0.10.0/go.mod h1:h7i0YLfIpamH9Doj8/dL9kSDoO/WyKtvYhvIYH6NAU4=
+github.com/fables-for-robots/jobs-iroh v0.11.0 h1:xvuTaQACqSyFOoLVjnnMasUaGmotpekWxNB+i5Wdz8Y=
+github.com/fables-for-robots/jobs-iroh v0.11.0/go.mod h1:h7i0YLfIpamH9Doj8/dL9kSDoO/WyKtvYhvIYH6NAU4=
 github.com/fxamacker/cbor/v2 v2.9.2 h1:X4Ksno9+x3cz0TZv69ec1hxP/+tymuR8PXQJyDwfh78=
 github.com/fxamacker/cbor/v2 v2.9.2/go.mod h1:vM4b+DJCtHn+zz7h3FFp/hDAI9WNWCsZj23V5ytsSxQ=
 github.com/getsentry/sentry-go v0.27.0 h1:Pv98CIbtB3LkMWmXi4Joa5OOcwbmnX88sF5qbK3r3Ps=
