@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.jpg" alt="assimilate — Jonas' Own Build System" width="600">
+</p>
+
 # assimilate
 
 Deploy the current state of your monorepo to Kubernetes: assimilate builds
