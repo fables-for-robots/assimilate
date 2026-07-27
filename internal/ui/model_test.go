@@ -10,7 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/fables-for-robots/assimilate/internal/spec"
+	"github.com/jobs-build/assimilate/internal/spec"
 )
 
 // fakeClock is a manually advanced time source.

@@ -1,4 +1,4 @@
-module github.com/fables-for-robots/assimilate
+module github.com/jobs-build/assimilate
 
 go 1.26.5
 
@@ -7,11 +7,11 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/x/ansi v0.11.6
-	github.com/fables-for-robots/amber-store-core v0.0.0-20260720222444-a37d35fa4ecf
-	github.com/fables-for-robots/jobs-iroh v0.11.0
 	github.com/fxamacker/cbor/v2 v2.9.2
 	github.com/go-git/go-git/v5 v5.19.1
 	github.com/google/go-github/v73 v73.0.0
+	github.com/jobs-build/amber-store-core v0.0.0-20260727080459-e4fcb60cba49
+	github.com/jobs-build/jobs-iroh v0.12.1-0.20260727080923-442ff61551d5
 	github.com/tmc/go-iroh v0.0.0-20260714221401-b17af420bb03
 	github.com/urfave/cli/v2 v2.27.7
 	golang.org/x/sys v0.47.0
@@ -51,7 +51,6 @@ require (
 	github.com/cyphar/filepath-securejoin v0.6.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
-	github.com/fables-for-robots/amber-store-iroh v0.0.0-20260721231548-857301522547 // indirect
 	github.com/getsentry/sentry-go v0.27.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.9.0 // indirect
@@ -61,6 +60,7 @@ require (
 	github.com/golang/snappy v0.0.5-0.20231225225746-43d5d4cd4e0e // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
+	github.com/jobs-build/amber-store-iroh v0.0.0-20260727080618-d80bbf75444f // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.19.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect

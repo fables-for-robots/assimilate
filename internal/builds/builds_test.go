@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fables-for-robots/assimilate/internal/jobs"
-	"github.com/fables-for-robots/assimilate/internal/spec"
+	"github.com/jobs-build/assimilate/internal/jobs"
+	"github.com/jobs-build/assimilate/internal/spec"
 )
 
 // guard bounds waits that only a broken orchestrator would hit; tests never

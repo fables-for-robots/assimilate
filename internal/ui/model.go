@@ -13,7 +13,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
 
-	"github.com/fables-for-robots/assimilate/internal/spec"
+	"github.com/jobs-build/assimilate/internal/spec"
 )
 
 const (

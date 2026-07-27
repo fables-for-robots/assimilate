@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fables-for-robots/assimilate/internal/spec"
+	"github.com/jobs-build/assimilate/internal/spec"
 )
 
 // call is one request as seen by the test server.

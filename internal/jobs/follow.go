@@ -16,10 +16,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fables-for-robots/jobs-iroh/api"
-	"github.com/fables-for-robots/jobs-iroh/wire"
+	"github.com/jobs-build/jobs-iroh/api"
+	"github.com/jobs-build/jobs-iroh/wire"
 
-	"github.com/fables-for-robots/assimilate/internal/spec"
+	"github.com/jobs-build/assimilate/internal/spec"
 )
 
 // maxFollowNodes caps one build's concurrent log-follow streams; a wide

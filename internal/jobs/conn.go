@@ -6,10 +6,10 @@ import (
 	"net"
 	"time"
 
-	"github.com/fables-for-robots/jobs-iroh/amberclient"
-	"github.com/fables-for-robots/jobs-iroh/api"
-	"github.com/fables-for-robots/jobs-iroh/wire"
 	"github.com/fxamacker/cbor/v2"
+	"github.com/jobs-build/jobs-iroh/amberclient"
+	"github.com/jobs-build/jobs-iroh/api"
+	"github.com/jobs-build/jobs-iroh/wire"
 	"github.com/tmc/go-iroh/iroh"
 )
 

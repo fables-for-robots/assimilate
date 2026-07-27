@@ -19,14 +19,14 @@ import (
 	"github.com/urfave/cli/v2"
 	"golang.org/x/term"
 
-	"github.com/fables-for-robots/assimilate/internal/argocd"
-	"github.com/fables-for-robots/assimilate/internal/builds"
-	"github.com/fables-for-robots/assimilate/internal/gitops"
-	"github.com/fables-for-robots/assimilate/internal/jobs"
-	"github.com/fables-for-robots/assimilate/internal/project"
-	"github.com/fables-for-robots/assimilate/internal/spec"
-	"github.com/fables-for-robots/assimilate/internal/tmpl"
-	"github.com/fables-for-robots/assimilate/internal/ui"
+	"github.com/jobs-build/assimilate/internal/argocd"
+	"github.com/jobs-build/assimilate/internal/builds"
+	"github.com/jobs-build/assimilate/internal/gitops"
+	"github.com/jobs-build/assimilate/internal/jobs"
+	"github.com/jobs-build/assimilate/internal/project"
+	"github.com/jobs-build/assimilate/internal/spec"
+	"github.com/jobs-build/assimilate/internal/tmpl"
+	"github.com/jobs-build/assimilate/internal/ui"
 )
 
 func main() {

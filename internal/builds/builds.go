@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/fables-for-robots/assimilate/internal/jobs"
-	"github.com/fables-for-robots/assimilate/internal/spec"
+	"github.com/jobs-build/assimilate/internal/jobs"
+	"github.com/jobs-build/assimilate/internal/spec"
 )
 
 // Backend abstracts the jobs client; *jobs.Client implements it, tests fake

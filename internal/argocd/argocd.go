@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fables-for-robots/assimilate/internal/spec"
+	"github.com/jobs-build/assimilate/internal/spec"
 )
 
 // maxExcerpt caps the response-body excerpt included in non-2xx errors.

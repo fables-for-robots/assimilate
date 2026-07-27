@@ -6,7 +6,7 @@ buildGoModule {
 
   src = lib.cleanSource ./.;
 
-  vendorHash = "sha256-jeJIH0ZeCqR5/kl0vKkSwwVsCEcpH89E84Je3PQI6xc=";
+  vendorHash = "sha256-xpJ46gBACPMoEzZijmmSsD+nC9t0I9tRicfWTEQP1uQ=";
 
   subPackages = [ "cmd/assimilate" ];
 
@@ -14,7 +14,7 @@ buildGoModule {
 
   meta = {
     description = "assimilate";
-    homepage = "https://github.com/fables-for-robots/assimilate";
+    homepage = "https://github.com/jobs-build/assimilate";
     license = lib.licenses.agpl3Only;
     mainProgram = "assimilate";
   };

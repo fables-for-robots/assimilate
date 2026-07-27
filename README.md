@@ -2,7 +2,7 @@
 
 Deploy the current state of your monorepo to Kubernetes: assimilate builds
 every image referenced by your k8s resource templates on a
-[jobs-iroh](https://github.com/fables-for-robots/jobs-iroh) server, renders
+[jobs-iroh](https://github.com/jobs-build/jobs-iroh) server, renders
 the manifests with the resulting image references, publishes them to your
 GitOps repo as a PR, and — with `--rollout` — merges the PR and triggers the
 ArgoCD refresh/sync.
